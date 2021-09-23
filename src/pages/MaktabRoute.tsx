@@ -14,6 +14,14 @@ import EmployeeBox from "../components/employee-box";
 import axios from "axios";
 import SnackbarContent from "@material-ui/core/SnackbarContent";
 
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+  QueryClient,
+  QueryClientProvider,
+} from "react-query";
+
 interface IEmployee {
   id: number;
   employee_name: string;
@@ -21,53 +29,17 @@ interface IEmployee {
   employee_age: number;
 }
 
+const fetchEmployees = async () => {
+  const res = await fetch("https://dummy.restapiexample.com/api/v1/employees");
+  return res.json();
+};
+
 function Route1() {
-  const [employees, setEmployees] = useState<Array<IEmployee>>();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [errMessage, setErrMessage] = useState<string>("");
-  const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false);
+  const { data, status } = useQuery("employees", fetchEmployees);
 
-  useEffect(() => {
-    setIsLoading(true);
-    fetchEmployees()
-      .then((emps) => {
-        //@ts-ignore
-        setEmployees(emps);
-        setSnackbarOpen(false);
-        setIsLoading(false);
-      })
-      .catch((err) => {
-        console.log(err);
-        setSnackbarOpen(false);
-        setErrMessage("Cannot fetch data");
-        setIsLoading(false);
-      });
-  }, []);
-
-  const handleRefresh = () => {
-    setEmployees([]);
-    setIsLoading(true);
-    fetchEmployees()
-      .then((emps) => {
-        //@ts-ignore
-        setEmployees(emps);
-        setSnackbarOpen(false);
-
-        setIsLoading(false);
-      })
-      .catch((err) => {
-        console.log(err);
-        setSnackbarOpen(true);
-        setErrMessage("Cannot fetch data");
-        setIsLoading(false);
-      });
-  };
-  const handleClose = () => {
-    setSnackbarOpen(false);
-  };
   return (
     <>
-      <Header refreshBTNclick={handleRefresh} disabled={isLoading} />
+      <Header disabled={status == "loading"} />
       <div
         style={{
           height: "100%",
@@ -79,12 +51,12 @@ function Route1() {
           alignItems: "center",
         }}
       >
-        {isLoading && <CircularProgress />}
+        {status == "loading" && <CircularProgress />}
       </div>
       <Container style={{ marginTop: "1.5rem" }}>
         <Grid container spacing={5} justifyContent="center">
-          {employees &&
-            employees.map((item, index) => (
+          {status == "success" &&
+            data.data.map((item: any, index: any) => (
               <Slide
                 direction={index % 2 == 0 ? "up" : "right"}
                 in={true}
@@ -104,38 +76,8 @@ function Route1() {
             ))}
         </Grid>
       </Container>
-      <Snackbar
-        anchorOrigin={{
-          vertical: "bottom",
-          horizontal: "center",
-        }}
-        open={snackbarOpen}
-        autoHideDuration={6000}
-        onClose={handleClose}
-        message={errMessage}
-        action={
-          <React.Fragment>
-            <Button color="secondary" size="small" onClick={handleRefresh}>
-              Refresh Again
-            </Button>
-          </React.Fragment>
-        }
-      />
     </>
   );
 }
 
 export default Route1;
-
-const fetchEmployees = () => {
-  return new Promise((resolve, reject) => {
-    axios
-      .get("https://dummy.restapiexample.com/api/v1/employees")
-      .then((res) => {
-        resolve(res.data.data);
-      })
-      .catch((err) => {
-        reject(err);
-      });
-  });
-};

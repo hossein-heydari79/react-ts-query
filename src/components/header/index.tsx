@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { Button, Container, Fab, Grid, Typography } from "@material-ui/core";
 import LoopIcon from "@material-ui/icons/Loop";
-const Header: React.FC<{ refreshBTNclick: Function, disabled: boolean }> = (props) => {
+const Header: React.FC<{ disabled: boolean }> = (props) => {
   return (
     <>
       <Container
@@ -23,15 +23,6 @@ const Header: React.FC<{ refreshBTNclick: Function, disabled: boolean }> = (prop
                   style={{ fontWeight: 100 }}
                 >
                   Employee List{" "}
-                  <Fab
-                  disabled={props.disabled}
-                    onClick={()=>props.refreshBTNclick()}
-                    size={"small"}
-                    style={{ backgroundColor: "teal" }}
-                    aria-label="add"
-                  >
-                    <LoopIcon style={{ color: "white" }} />
-                  </Fab>
                 </Typography>
               </Grid>
               <Grid item>
